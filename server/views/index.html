@@ -1,0 +1,92 @@
+<html>
+<head>
+	<script type="text/javascript" src="/public/js/jquery-latest.min.js"></script>
+	<script type="text/javascript" src="/public/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="/public/css/bootstrap-theme.min.css">
+	<link rel="stylesheet" type="text/css" href="/public/css/bootstrap.min.css">
+	<title>LittleDictionary</title>
+</head>
+<body>
+	<nav class="navbar navbar-default navbar-static-top" role="navigation">
+		<div class="container-fluid">
+			<a class="navbar-brand" href="/">LittleDictionary</a>
+			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+	      <ul class="nav navbar-nav">
+					<li class="active"><a href="/">View</a>
+					<li><a href="/add">Add new word</a></li>
+					<li><a href="/find">Find word</a></li>
+				</ul>
+		</div>
+	</nav>
+	
+	<script type="text/javascript">
+	
+		$(window).load = (function(){
+			$.ajax({
+				type: "GET",
+				cache: false,
+				url: "/words",
+				
+				success: function (dataobj, state, jqxhr) {
+					var attach = $('#results');
+					attach.html("");
+					var lines = '<tr >' +
+					'<th>Word</th>'+
+					'<th>Pos</th>'+
+					'<th>Definition</th>'+
+					'<th>Language</th>'+
+					'<th>Example</th>'+
+					'<th>Ethymology</th>'+
+					'<th>Delete</th>'+
+					'</tr>';
+
+					data = JSON.parse(dataobj);
+
+					if(!data.Words){
+						$("#status-message")
+          		.html("Your Dictionary is Emtpy, click <a href='/add'>Here</a> to begin feeding it !")
+          		.addClass('alert-info');
+          		return;
+					} else {
+						$("#status-message").hide();
+					}
+
+					data.Words.forEach(function(o){
+						if(o.Word == "" || !o.Word){
+							return;
+						}
+
+						var example = o.Example || "";
+						var ethymology = o.Ethymology || "";
+
+						var line = '<tr>' +
+							'<td >'+o.Word+'</td>' +
+							'<td >'+o.Pos+'</td>' +
+							'<td >'+o.Definition+'</td>' +
+							'<td >'+o.Language+'</td>' +
+							'<td >'+example+'</td>' +
+							'<td >'+ethymology+'</td>' +
+							'<td id="delete">x</td>'+
+							'</tr>';
+						lines += line;
+					});
+					attach.html(lines);
+	        
+	      },
+	      error: function (jqxhr, state, err) {
+	      	$("#status-message").text("No Results !")
+	      	$('#results').innerHTML = ""
+	      }
+	    });
+		}())
+	</script>
+	<div class="panel panel-default">
+  <!-- Default panel contents -->
+  	  	<div id="status-message" class="panel-heading">Words in your LittleDictionary</div>
+	
+		<table class="table table-bordered table-responsive" id="results">
+		
+		</table>
+	</div>
+</body>
+</html>
