@@ -6,7 +6,7 @@ import (
   "encoding/json"
   "io"
   "fmt"
-  "../middlewares"
+  "LittleDictionary/server/middlewares"
   "gopkg.in/mgo.v2/bson"
 )
 

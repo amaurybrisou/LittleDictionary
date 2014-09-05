@@ -4,9 +4,9 @@ import (
   // "fmt"
   "log"
   "net/http"
-  "../config"
-  "./middlewares"
-  "./handlers"
+  "LittleDictionary/config"
+  "LittleDictionary/server/middlewares"
+  "LittleDictionary/server/handlers"
 )
 
 

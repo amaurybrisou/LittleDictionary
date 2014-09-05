@@ -2,7 +2,7 @@ package main
 
 
 import (	
-  "./server"
+  "LittleDictionary/server"
 	// "log"
 )
 
