@@ -28,6 +28,14 @@ func Server() {
       cfg.Database.DbName,
       cfg.Database.CollectionName ))
 
+  http.Handle("/word/update",
+    middlewares.Mongo(
+      http.HandlerFunc(handlers.UpdateWord), 
+      cfg.Database.Url,
+      cfg.Database.Port,
+      cfg.Database.DbName,
+      cfg.Database.CollectionName ))
+
   http.Handle("/words/filter",
     middlewares.Mongo(
       http.HandlerFunc(handlers.FilterWords), 

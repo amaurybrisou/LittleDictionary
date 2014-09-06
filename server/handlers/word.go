@@ -8,12 +8,14 @@ import (
   "fmt"
   "LittleDictionary/server/middlewares"
   "gopkg.in/mgo.v2/bson"
+  "gopkg.in/mgo.v2"
   "math/rand"
   "time"
   "errors"
 )
 
 type Word struct {
+  Id bson.ObjectId `_id,omitempty`
   Word string
   Pos string
   Definition string 
@@ -22,7 +24,15 @@ type Word struct {
   Ethymology string `json:",omitempty"`
 }
 
-
+type UpdatedWord struct {
+  Id bson.ObjectId `_id,omitempty`
+  Word string `json:",omitempty"`
+  Pos string `json:",omitempty"`
+  Definition string `json:",omitempty"`
+  Language string `json:",omitempty"`
+  Example string `json:",omitempty"`
+  Ethymology string `json:",omitempty"`
+}
 
 
 func AddWord(w http.ResponseWriter, r *http.Request){
@@ -34,9 +44,12 @@ func AddWord(w http.ResponseWriter, r *http.Request){
     return
   }
 
+  rObj.Id = bson.NewObjectId()
+
   c := middlewares.GetWords(r)
 
   err = c.Insert(&Word{
+    rObj.Id,
     rObj.Word, 
     rObj.Pos, 
     rObj.Definition, 
@@ -53,6 +66,45 @@ func AddWord(w http.ResponseWriter, r *http.Request){
     fmt.Fprintf(w, jsonMsg) 
   }
 }
+
+func UpdateWord(w http.ResponseWriter, r *http.Request){
+  rObj, err := getUpdatedBody(r.Body)
+  
+  if err != nil {
+    jsonMsg, _ := forgeResponse(Response{false, nil}) 
+    http.Error(w, jsonMsg, http.StatusOK)
+    return
+  }
+
+  c := middlewares.GetWords(r)
+
+  q := buildUpdateQuery(&rObj)
+
+  change := mgo.Change{
+    Update: bson.M{"$set": q},
+    ReturnNew: false,
+  }
+
+  word := UpdatedWord{}
+  _, err = c.Find(bson.M{"_id": bson.ObjectId(rObj.Id)}).Apply(change, &word)
+
+  if err != nil {
+    log.Println("Error fetching : ", err)
+    jsonMsg, _ := forgeResponse(Response{false, nil}) 
+    
+    http.Error(w, jsonMsg, http.StatusNoContent)
+    return
+  } else {
+    var status = true
+    
+    jsonMsg, _ := forgeResponse(Response{status, nil})
+
+    fmt.Fprintf(w, jsonMsg)
+    return 
+    
+  }
+}
+
 
 func FilterWords(w http.ResponseWriter, r *http.Request){
   rObj, err := getBody(r.Body)
@@ -87,11 +139,6 @@ func FilterWords(w http.ResponseWriter, r *http.Request){
     return 
     
   }
-
-  // jsonMsg, _ := forgeResponse(Response{false, nil}) 
-    
-  // http.Error(w, jsonMsg, http.StatusInternalServerError)
-  // return
 }
 
 func FindWords(w http.ResponseWriter, r *http.Request){
@@ -109,7 +156,12 @@ func FindWords(w http.ResponseWriter, r *http.Request){
     return
   } else {
 
-    jsonMsg, _ := forgeResponse(Response{true, words})
+    var status = true
+    if len(words) == 0 {
+      status = false
+    }
+    
+    jsonMsg, _ := forgeResponse(Response{status, words})
 
     fmt.Fprintf(w, jsonMsg)
     return 
@@ -163,6 +215,36 @@ func forgeResponse(rep Response) (string, error){
   return jsonMsg, nil
 }
 
+func buildUpdateQuery(rObj *UpdatedWord) (q map[string]string){
+  q = make(map[string]string)
+
+  if rObj.Word != "" {
+    q["word"] = rObj.Word
+  }
+
+  if rObj.Pos != "" {
+    q["pos"] = rObj.Pos
+  }
+
+  if rObj.Definition != "" {
+    q["definition"] = rObj.Definition
+  }
+
+  if rObj.Language != "" {
+    q["language"] = rObj.Language
+  }
+
+  if rObj.Example != "" {
+    q["example"] = rObj.Example
+  }
+
+  if rObj.Ethymology != "" {
+    q["ethymology"] = rObj.Ethymology
+  }
+  return q
+}
+
+
 func buildQuery(rObj *Word) (q []bson.M){
   if rObj.Word != "" {
     q = append(q, bson.M{ "word": rObj.Word })
@@ -205,3 +287,21 @@ func getBody(body io.Reader) (t Word, e error) {
   return t, nil
 }
 
+
+func getUpdatedBody(body io.Reader) (t UpdatedWord, e error) {
+  decoder := json.NewDecoder(body)
+  err := decoder.Decode(&t)
+  if err != nil {
+    log.Println("Error deconding request Body ", err)
+  }
+
+  emptyWord := UpdatedWord{}
+
+  if t == emptyWord {
+    return t, errors.New("Empty Object")
+  }
+
+
+  return t, nil
+  
+}

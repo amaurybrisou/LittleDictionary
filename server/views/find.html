@@ -2,6 +2,8 @@
 <head>
 	<script type="text/javascript" src="/public/js/jquery-latest.min.js"></script>
 	<script type="text/javascript" src="/public/js/alpaca-full.min.js"></script>
+	<script type="text/javascript" src="/public/js/jquery-editable.min.js"></script>
+	<script type="text/javascript" src="/public/js/little-dictionary.js"></script>
 	<script type="text/javascript" src="/public/js/bootstrap.min.js"></script>
 
 	<link rel="stylesheet" type="text/css" href="/public/css/bootstrap-theme.min.css">
@@ -78,29 +80,31 @@
 									}
 
 									data.Words.forEach(function(o){
-										if(o.Word == "" || !o.Word){
-											return;
-										}
+										if (o.Word == "" || !o.Word) {
+						          return;
+						        }
 
-										var example = o.Example || "";
-										var ethymology = o.Ethymology || "";
+						        var example = o.Example || "";
+						        var ethymology = o.Ethymology || "";
 
-										var line = '<tr>' +
-											'<td >'+o.Word+'</td>' +
-											'<td >'+o.Pos+'</td>' +
-											'<td >'+o.Definition+'</td>' +
-											'<td >'+o.Language+'</td>' +
-											'<td >'+example+'</td>' +
-											'<td >'+ethymology+'</td>' +
-											'<td >x</td>'+
-											'</tr>';
-										lines += line;
+						        var line = '<tr">' +
+						          '<td id="' + o.Id + '_Word" class="editable word">' + o.Word + '</td>' +
+						          '<td id="' + o.Id + '_Pos" class="pos_editable">' + o.Pos + '</td>' +
+						          '<td id="' + o.Id + '_Definition" class="editable">' + o.Definition + '</td>' +
+						          '<td id="' + o.Id + '_Language" class="editable">' + o.Language + '</td>' +
+						          '<td id="' + o.Id + '_Example" class="editable">' + example + '</td>' +
+						          '<td id="' + o.Id + '_Ethymology" class="editable">' + ethymology + '</td>' +
+						          '<td id="' + o.Id + '" class="delete">x</td>' +
+						          '</tr>';
+						        lines += line;
 									});
 									attach.html(lines);
 									$("#status-message")
 										.text('Words found')
 										.addClass('alert-success')
 										.show();
+									bindEdit();
+      						bindPosEdit();
                 },
                 error: function (jqxhr, state, err) {
                 	$("#status-message")
