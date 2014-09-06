@@ -15,16 +15,21 @@ type (
 	Context struct {
 		MongoDB *mgo.Database
 	}
+  Callback func(*mgo.Database) (error)
 )
 
 
-func Mongo(h http.Handler, url string, port string, dbName string) http.Handler {
+func Mongo(
+  h http.Handler, 
+  url string, 
+  port string, 
+  dbName string, 
+  collection string) http.Handler {
+
 	session, err := mgo.Dial(url+":"+port)
   if err != nil {
     log.Fatal("Error connecting to MongoDB Server : ", err)
   }
-
-  log.Println("Connected to MongoDB on "+dbName)
 
 	f := func(w http.ResponseWriter, r *http.Request) {
 
@@ -36,14 +41,7 @@ func Mongo(h http.Handler, url string, port string, dbName string) http.Handler 
 
     db := reqSession.DB(dbName)
 
-    c := db.C("Words")
-
-    index := mgo.Index{
-      Key: []string{"word", "pos"},
-      Unique: true,
-    }
-
-    c.EnsureIndex(index)
+    //createCollection(db, collection)
 
     set(r, "db", db)
 
@@ -53,6 +51,17 @@ func Mongo(h http.Handler, url string, port string, dbName string) http.Handler 
 	return http.HandlerFunc(f)
 }
 
+func createCollection(db *mgo.Database, c string) (){
+  collec := db.C(c)
+
+  index := mgo.Index{
+    Key: []string{"word", "pos", "definition"},
+    Unique: true,
+  }
+
+  collec.EnsureIndex(index)
+
+}
 
 var (
     mutex sync.Mutex

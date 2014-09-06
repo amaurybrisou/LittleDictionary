@@ -11,21 +11,31 @@
 	<title>LittleDictionary</title>
 </head>
 <body>
-	<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<nav class="navbar navbar-default navbar-static-top" role="navigation">
 		<div class="container-fluid">
-			<a class="navbar-brand" href="/">LittleDictionary</a>
+		<div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">LittleDictionary</a>
+    </div>
 			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 	      <ul class="nav navbar-nav">
 					<li ><a href="/">View</a>
-					<li ><a href="/add">Add new word</a></li>
-					<li class="active"><a href="/find">Find word</a></li>
+					<li><a href="/add">Add</a></li>
+					<li class="active"><a href="/find">Find</a></li>
 				</ul>
 		</div>
 	</nav>
-	<div id="status-message" class="alert col-xs-12 .col-md-8" role="alert"></div>
 	<div id="mainForm"></div>
 	<script type="text/javascript">
+
+
 		$(function() {
+
 	    $("#mainForm").alpaca({
 	        "dataSource": "/public/forms/find/data.json",
 	        "optionsSource": "/public/forms/find/options.json",
@@ -56,6 +66,15 @@
 
 									data = JSON.parse(dataobj);
 
+									if(!data.Words){
+									$("#status-message")
+			          		.html("Your Dictionary is Emtpy, click <a href='/add'>Here</a> to begin feeding it !")
+			          		.addClass('alert-info');
+			          		return;
+									} else {
+										$("#status-message").hide();
+									}
+
 									data.Words.forEach(function(o){
 										if(o.Word == "" || !o.Word){
 											return;
@@ -76,12 +95,17 @@
 										lines += line;
 									});
 									attach.html(lines);
+									$("#status-message")
+										.text('Words found')
+										.addClass('alert-success')
+										.show();
                 },
                 error: function (jqxhr, state, err) {
                 	$("#status-message")
                 		.text("No Results !")
-                		.addClass('alert-info');
-                	$('#results').innerHTML = ""
+                		.addClass('alert-info')
+                		.show();
+                	$('#results').html("");
                 }
               });
               return false;
@@ -91,7 +115,11 @@
 		});
 	</script>
 	<div class="panel panel-default">
-  	<div class="panel-heading">Words found</div>
+		
+  	<div id="status-message" role="alert" class="alert" style="display:none">
+  		
+  	</div>
+
 		<table class="table table-bordered table-responsive" id="results">
 		
 		</table>

@@ -2,7 +2,12 @@
 url = localhost
 port = 27017
 dbName = LittleDictionary
+collectionName = Words
 
 [http]
 host = 0.0.0.0
 port=8080
+
+[auth]
+username = <change it>
+password = <change it>

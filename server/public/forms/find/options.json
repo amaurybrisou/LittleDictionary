@@ -6,8 +6,7 @@
       "find": {
         "id": "find-button",
         "value": "Find"
-      },
-      "reset": {}
+      }
     }
   },
   "fields": {

@@ -11,10 +11,15 @@ type Config struct {
     Url string
     Port string
     DbName string
+    CollectionName string
   }
   Http struct {
   	Host string 
   	Port string
+  }
+  Auth struct {
+    Username string 
+    Password string
   }
 }
 
