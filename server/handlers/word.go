@@ -57,7 +57,6 @@ func AddWord(w http.ResponseWriter, r *http.Request){
 func FilterWords(w http.ResponseWriter, r *http.Request){
   rObj, err := getBody(r.Body)
   
-  log.Println(rObj, err)
   if err != nil {
     jsonMsg, _ := forgeResponse(Response{false, nil}) 
     http.Error(w, jsonMsg, http.StatusOK)
@@ -136,8 +135,6 @@ func RandomWord(w http.ResponseWriter, r *http.Request){
     rand.Seed(time.Now().UnixNano())
     index := rand.Intn(len(words))
 
-    log.Println(index)
-
     jsonMsg, _ := forgeResponse(Response{true, words[index:index+1]})
 
     fmt.Fprintf(w, jsonMsg)
@@ -203,7 +200,6 @@ func getBody(body io.Reader) (t Word, e error) {
   emptyWord := Word{}
 
   if t == emptyWord {
-    log.Println("t is null")
     return t, errors.New("Empty Object")
   }
   return t, nil
