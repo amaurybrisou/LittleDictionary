@@ -44,6 +44,14 @@ func Server() {
       cfg.Database.DbName,
       cfg.Database.CollectionName ))
 
+  http.Handle("/words/random",
+    middlewares.Mongo(
+      http.HandlerFunc(handlers.RandomWord), 
+      cfg.Database.Url,
+      cfg.Database.Port,
+      cfg.Database.DbName,
+      cfg.Database.CollectionName ))
+
 
 
   log.Println("Http Server Listening on "+cfg.Http.Host+":"+cfg.Http.Port)

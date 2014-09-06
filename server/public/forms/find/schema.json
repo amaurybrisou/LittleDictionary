@@ -1,5 +1,5 @@
 {
-  "title": "Add new word",
+  "title": "Find word",
   "type": "object",
   "properties": {
     "Word": {

@@ -11,13 +11,9 @@ import (
 )
 
 
-type (
-	Context struct {
-		MongoDB *mgo.Database
-	}
-  Callback func(*mgo.Database) (error)
+var (
+  collectionName string 
 )
-
 
 func Mongo(
   h http.Handler, 
@@ -25,6 +21,8 @@ func Mongo(
   port string, 
   dbName string, 
   collection string) http.Handler {
+
+  collectionName = collection
 
 	session, err := mgo.Dial(url+":"+port)
   if err != nil {
@@ -50,7 +48,7 @@ func Mongo(
 
     collec.EnsureIndex(index)
 
-    set(r, "db", db)
+    set(r, collection, collec)
 
   	h.ServeHTTP(w, r)
   }
@@ -76,11 +74,11 @@ func set(r *http.Request, key, val interface{}) {
   data[r][key] = val
 }
 
-func GetDB(r *http.Request) (d *mgo.Database){
+func GetWords(r *http.Request) (d *mgo.Collection){
   mutex.Lock()
   defer mutex.Unlock()
   if data[r] != nil {
-    return data[r]["db"].(*mgo.Database)
+    return data[r][collectionName].(*mgo.Collection)
   }
   return d
 }

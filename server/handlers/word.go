@@ -8,6 +8,8 @@ import (
   "fmt"
   "LittleDictionary/server/middlewares"
   "gopkg.in/mgo.v2/bson"
+  "math/rand"
+  "time"
 )
 
 type Word struct {
@@ -36,8 +38,8 @@ type Response struct {
 
 func AddWord(w http.ResponseWriter, r *http.Request){
   rObj := getBody(r.Body)
-  db := middlewares.GetDB(r)
-  c := db.C("Words")
+  c := middlewares.GetWords(r)
+  
 
   emptyWord := Word{}
   
@@ -110,8 +112,7 @@ func buildQuery(rObj *Word) (q []bson.M){
 
 func FilterWords(w http.ResponseWriter, r *http.Request){
   rObj := getBody(r.Body)
-  db := middlewares.GetDB(r)
-  c := db.C("Words")
+  c := middlewares.GetWords(r)
 
   q := buildQuery(&rObj)
 
@@ -147,8 +148,7 @@ func FilterWords(w http.ResponseWriter, r *http.Request){
 }
 
 func FindWords(w http.ResponseWriter, r *http.Request){
-  db := middlewares.GetDB(r)
-  c := db.C("Words")
+  c := middlewares.GetWords(r)
 
 
   words := []Word{} 
@@ -172,7 +172,38 @@ func FindWords(w http.ResponseWriter, r *http.Request){
   jsonMsg, _ := forgeResponse(Response{false, nil}) 
     
   http.Error(w, jsonMsg, http.StatusInternalServerError)
-  return
-  
-  
+  return 
+}
+
+
+func RandomWord(w http.ResponseWriter, r *http.Request){
+  c := middlewares.GetWords(r)
+
+  words := []Word{} 
+
+  err := c.Find(bson.M{}).All(&words)
+
+  if err != nil {
+    log.Println("Error fetching : ", err)
+    jsonMsg, _ := forgeResponse(Response{false, nil}) 
+    
+    http.Error(w, jsonMsg, http.StatusInternalServerError)
+    return
+  } else {
+
+    rand.Seed(time.Now().UnixNano())
+    index := rand.Intn(len(words))
+
+    log.Println(index)
+
+    jsonMsg, _ := forgeResponse(Response{true, words[index:index+1]})
+
+    fmt.Fprintf(w, jsonMsg)
+    return 
+  }
+
+  jsonMsg, _ := forgeResponse(Response{false, nil}) 
+    
+  http.Error(w, jsonMsg, http.StatusInternalServerError)
+  return 
 }
