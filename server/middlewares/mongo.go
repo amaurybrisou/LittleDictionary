@@ -41,7 +41,14 @@ func Mongo(
 
     db := reqSession.DB(dbName)
 
-    //createCollection(db, collection)
+    collec := db.C(collection)
+
+    index := mgo.Index{
+      Key: []string{"word", "pos", "definition"},
+      Unique: true,
+    }
+
+    collec.EnsureIndex(index)
 
     set(r, "db", db)
 
@@ -49,18 +56,6 @@ func Mongo(
   }
 
 	return http.HandlerFunc(f)
-}
-
-func createCollection(db *mgo.Database, c string) (){
-  collec := db.C(c)
-
-  index := mgo.Index{
-    Key: []string{"word", "pos", "definition"},
-    Unique: true,
-  }
-
-  collec.EnsureIndex(index)
-
 }
 
 var (
