@@ -10,6 +10,7 @@ import (
   "gopkg.in/mgo.v2/bson"
   "math/rand"
   "time"
+  "errors"
 )
 
 type Word struct {
@@ -22,34 +23,20 @@ type Word struct {
 }
 
 
-func getBody(body io.Reader) (t Word, ) {
-  decoder := json.NewDecoder(body)
-  err := decoder.Decode(&t)
-  if err != nil {
-    log.Println("Error deconding request Body ")
-  }
-  return t
-}
 
-type Response struct {
-  Result bool
-  Words []Word `json:",omitempty"`
-}
 
 func AddWord(w http.ResponseWriter, r *http.Request){
-  rObj := getBody(r.Body)
-  c := middlewares.GetWords(r)
+  rObj, err := getBody(r.Body)
   
-
-  emptyWord := Word{}
-  
-  if rObj == emptyWord {
+  if err != nil {
     jsonMsg, _ := forgeResponse(Response{false, nil}) 
-    
-    http.Error(w, jsonMsg, http.StatusInternalServerError)
+    http.Error(w, jsonMsg, http.StatusOK)
+    return
   }
 
-  err := c.Insert(&Word{
+  c := middlewares.GetWords(r)
+
+  err = c.Insert(&Word{
     rObj.Word, 
     rObj.Pos, 
     rObj.Definition, 
@@ -58,18 +45,114 @@ func AddWord(w http.ResponseWriter, r *http.Request){
     rObj.Ethymology })
   if err != nil {
     log.Println(err)
-
     jsonMsg, _ := forgeResponse(Response{false, nil}) 
-    
-    http.Error(w, jsonMsg, http.StatusInternalServerError)
+    http.Error(w, jsonMsg, http.StatusNoContent)
   } else {
     jsonMsg, _ := forgeResponse(Response{true, nil}) 
     log.Println("Word added")
     fmt.Fprintf(w, jsonMsg) 
   }
+}
 
+func FilterWords(w http.ResponseWriter, r *http.Request){
+  rObj, err := getBody(r.Body)
   
-  
+  log.Println(rObj, err)
+  if err != nil {
+    jsonMsg, _ := forgeResponse(Response{false, nil}) 
+    http.Error(w, jsonMsg, http.StatusOK)
+    return
+  }
+
+  c := middlewares.GetWords(r)
+  q := buildQuery(&rObj)
+
+  words := []Word{}
+  err = c.Find(bson.M{ "$or": q }).Sort("word").All(&words)
+
+  if err != nil {
+    log.Println("Error fetching : ", err)
+    jsonMsg, _ := forgeResponse(Response{false, nil}) 
+    
+    http.Error(w, jsonMsg, http.StatusNoContent)
+    return
+  } else {
+    var status = true
+    if len(words) == 0 {
+      status = false
+    }
+    
+    jsonMsg, _ := forgeResponse(Response{status, words})
+
+    fmt.Fprintf(w, jsonMsg)
+    return 
+    
+  }
+
+  // jsonMsg, _ := forgeResponse(Response{false, nil}) 
+    
+  // http.Error(w, jsonMsg, http.StatusInternalServerError)
+  // return
+}
+
+func FindWords(w http.ResponseWriter, r *http.Request){
+  c := middlewares.GetWords(r)
+
+  words := []Word{} 
+
+  err := c.Find(bson.M{}).Sort("word").All(&words)
+
+  if err != nil {
+    log.Println("Error fetching : ", err)
+    jsonMsg, _ := forgeResponse(Response{false, nil}) 
+    
+    http.Error(w, jsonMsg, http.StatusNoContent)
+    return
+  } else {
+
+    jsonMsg, _ := forgeResponse(Response{true, words})
+
+    fmt.Fprintf(w, jsonMsg)
+    return 
+  }
+
+}
+
+func RandomWord(w http.ResponseWriter, r *http.Request){
+  c := middlewares.GetWords(r)
+
+  words := []Word{} 
+
+  err := c.Find(bson.M{}).All(&words)
+
+  if err != nil {
+    log.Println("Error fetching : ", err)
+    jsonMsg, _ := forgeResponse(Response{false, nil}) 
+    
+    http.Error(w, jsonMsg, http.StatusNoContent)
+    return
+  } else {
+
+    rand.Seed(time.Now().UnixNano())
+    index := rand.Intn(len(words))
+
+    log.Println(index)
+
+    jsonMsg, _ := forgeResponse(Response{true, words[index:index+1]})
+
+    fmt.Fprintf(w, jsonMsg)
+    return 
+  }
+
+  jsonMsg, _ := forgeResponse(Response{false, nil}) 
+    
+  http.Error(w, jsonMsg, http.StatusInternalServerError)
+  return 
+}
+
+type Response struct {
+  Result bool
+  Words []Word `json:",omitempty"`
 }
 
 func forgeResponse(rep Response) (string, error){
@@ -110,100 +193,19 @@ func buildQuery(rObj *Word) (q []bson.M){
   return q
 }
 
-func FilterWords(w http.ResponseWriter, r *http.Request){
-  rObj := getBody(r.Body)
-  c := middlewares.GetWords(r)
-
-  q := buildQuery(&rObj)
-
-
-  if len(q) == 0 {
-    FindWords(w, r)
-    return;
-  }
-
-  words := []Word{}
-  err := c.Find(bson.M{ "$or": q }).All(&words)
-
+func getBody(body io.Reader) (t Word, e error) {
+  decoder := json.NewDecoder(body)
+  err := decoder.Decode(&t)
   if err != nil {
-    log.Println("Error fetching : ", err)
-    jsonMsg, _ := forgeResponse(Response{false, nil}) 
-    
-    http.Error(w, jsonMsg, http.StatusInternalServerError)
-    return
-  } else {
-
-    if len(words) != 0 {
-      jsonMsg, _ := forgeResponse(Response{true, words})
-
-      fmt.Fprintf(w, jsonMsg)
-      return 
-    }
+    log.Println("Error deconding request Body ")
   }
 
-  jsonMsg, _ := forgeResponse(Response{false, nil}) 
-    
-  http.Error(w, jsonMsg, http.StatusInternalServerError)
-  return
+  emptyWord := Word{}
+
+  if t == emptyWord {
+    log.Println("t is null")
+    return t, errors.New("Empty Object")
+  }
+  return t, nil
 }
 
-func FindWords(w http.ResponseWriter, r *http.Request){
-  c := middlewares.GetWords(r)
-
-
-  words := []Word{} 
-
-  err := c.Find(bson.M{}).All(&words)
-
-  if err != nil {
-    log.Println("Error fetching : ", err)
-    jsonMsg, _ := forgeResponse(Response{false, nil}) 
-    
-    http.Error(w, jsonMsg, http.StatusInternalServerError)
-    return
-  } else {
-
-    jsonMsg, _ := forgeResponse(Response{true, words})
-
-    fmt.Fprintf(w, jsonMsg)
-    return 
-  }
-
-  jsonMsg, _ := forgeResponse(Response{false, nil}) 
-    
-  http.Error(w, jsonMsg, http.StatusInternalServerError)
-  return 
-}
-
-
-func RandomWord(w http.ResponseWriter, r *http.Request){
-  c := middlewares.GetWords(r)
-
-  words := []Word{} 
-
-  err := c.Find(bson.M{}).All(&words)
-
-  if err != nil {
-    log.Println("Error fetching : ", err)
-    jsonMsg, _ := forgeResponse(Response{false, nil}) 
-    
-    http.Error(w, jsonMsg, http.StatusInternalServerError)
-    return
-  } else {
-
-    rand.Seed(time.Now().UnixNano())
-    index := rand.Intn(len(words))
-
-    log.Println(index)
-
-    jsonMsg, _ := forgeResponse(Response{true, words[index:index+1]})
-
-    fmt.Fprintf(w, jsonMsg)
-    return 
-  }
-
-  jsonMsg, _ := forgeResponse(Response{false, nil}) 
-    
-  http.Error(w, jsonMsg, http.StatusInternalServerError)
-  return 
-}

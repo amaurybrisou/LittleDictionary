@@ -50,7 +50,7 @@
 
 					data = JSON.parse(dataobj);
 
-					if(!data.Words){
+					if(!data.Result){
 						$("#status-message")
           		.html("Your Dictionary is Emtpy, click <a href='/add'>Here</a> to begin feeding it !")
           		.addClass('alert-info');
@@ -82,7 +82,7 @@
 	        
 	      },
 	      error: function (jqxhr, state, err) {
-	      	$("#status-message").text("No Results !")
+	      	$("#status-message").text("Internal Error")
 	      	$('#results').innerHTML = ""
 	      }
 	    });
@@ -92,7 +92,7 @@
   <!-- Default panel contents -->
   	  	<div id="status-message" class="panel-heading">Words in your LittleDictionary</div>
 	
-		<table class="table table-bordered table-responsive" id="results">
+		<table data-sort-name="Word" data-sort-order="asc" class="table table-bordered table-responsive" id="results">
 		
 		</table>
 	</div>

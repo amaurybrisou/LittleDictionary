@@ -66,11 +66,13 @@
 
 									data = JSON.parse(dataobj);
 
-									if(!data.Words){
-									$("#status-message")
-			          		.html("Your Dictionary is Emtpy, click <a href='/add'>Here</a> to begin feeding it !")
-			          		.addClass('alert-info');
-			          		return;
+									if(!data.Result){
+										$("#status-message")
+	                		.text("No Results !")
+	                		.addClass('alert-info')
+	                		.show();
+                		$('#results').html("");
+				          		return;
 									} else {
 										$("#status-message").hide();
 									}
