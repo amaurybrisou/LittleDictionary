@@ -36,7 +36,7 @@ var getWordsAndDraw = function () {
         var example = o.Example || "";
         var ethymology = o.Ethymology || "";
 
-        var line = '<tr">' +
+        var line = '<tr id="tr_' + o.Id + '">' +
           '<td id="' + o.Id + '_Word" class="editable word">' + o.Word + '</td>' +
           '<td id="' + o.Id + '_Pos" class="pos_editable">' + o.Pos + '</td>' +
           '<td id="' + o.Id + '_Definition" class="editable">' + o.Definition + '</td>' +
@@ -50,12 +50,35 @@ var getWordsAndDraw = function () {
       attach.html(lines);
       bindEdit();
       bindPosEdit();
+      bindDelete();
 
     },
     error: function (jqxhr, state, err) {
       $("#status-message").text("Internal Error")
       $('#results').innerHTML = ""
     }
+  });
+}
+
+var bindDelete = function () {
+  $('.delete').click(function (event) {
+    var p = $(event.target).parent();
+    wordId = event.target.id;
+    $.ajax({
+      type: "POST",
+      cache: false,
+      url: "/word/delete",
+      data: JSON.stringify({
+        Id: wordId
+      }),
+      success: function (dataobj, state, jqxhr) {
+        p.remove();
+      },
+      error: function (jqxhr, state, err) {
+        $("#status-message").text("Internal Error")
+        $('#results').innerHTML = ""
+      }
+    });
   });
 }
 

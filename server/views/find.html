@@ -87,7 +87,7 @@
 						        var example = o.Example || "";
 						        var ethymology = o.Ethymology || "";
 
-						        var line = '<tr">' +
+						        var line = '<tr id="tr_' + o.Id + '">' +
 						          '<td id="' + o.Id + '_Word" class="editable word">' + o.Word + '</td>' +
 						          '<td id="' + o.Id + '_Pos" class="pos_editable">' + o.Pos + '</td>' +
 						          '<td id="' + o.Id + '_Definition" class="editable">' + o.Definition + '</td>' +
@@ -105,6 +105,8 @@
 										.show();
 									bindEdit();
       						bindPosEdit();
+      						bindDelete();
+
                 },
                 error: function (jqxhr, state, err) {
                 	$("#status-message")

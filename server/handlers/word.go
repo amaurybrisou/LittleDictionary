@@ -67,6 +67,37 @@ func AddWord(w http.ResponseWriter, r *http.Request){
   }
 }
 
+func DelWord(w http.ResponseWriter, r *http.Request){
+  rObj, err := getUpdatedBody(r.Body)
+  
+  if err != nil {
+    jsonMsg, _ := forgeResponse(Response{false, nil}) 
+    http.Error(w, jsonMsg, http.StatusOK)
+    return
+  }
+
+  c := middlewares.GetWords(r)
+
+
+  err = c.Remove(bson.M{"_id": bson.ObjectId(rObj.Id)})
+
+  if err != nil {
+    log.Println("Error Removing  : ", err)
+    jsonMsg, _ := forgeResponse(Response{false, nil}) 
+    
+    http.Error(w, jsonMsg, http.StatusNoContent)
+    return
+  } else {
+    var status = true
+    
+    jsonMsg, _ := forgeResponse(Response{status, nil})
+
+    fmt.Fprintf(w, jsonMsg)
+    return 
+    
+  }
+}
+
 func UpdateWord(w http.ResponseWriter, r *http.Request){
   rObj, err := getUpdatedBody(r.Body)
   
