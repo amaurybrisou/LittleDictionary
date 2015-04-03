@@ -214,7 +214,9 @@ func RandomWord(w http.ResponseWriter, r *http.Request){
     http.Error(w, jsonMsg, http.StatusNoContent)
     return
   } else {
-
+    if len(words) == 0 {
+      return
+    }
     rand.Seed(time.Now().UnixNano())
     index := rand.Intn(len(words))
 

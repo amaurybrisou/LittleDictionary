@@ -6,7 +6,6 @@ import (
   "LittleDictionary/config"
   "LittleDictionary/server/middlewares"
   "LittleDictionary/server/handlers"
-  "github.com/icub3d/httpauth"
 )
 
 
@@ -14,15 +13,17 @@ import (
 func Server() {
   cfg := config.Get("config.gcfg")
 
-  http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("server/public/"))))
+  auth := middlewares.NewBasicAuth(cfg.Auth.Username, cfg.Auth.Password)
 
-  http.HandleFunc("/", handlers.IndexHandler)
-  http.HandleFunc("/add", handlers.AddHandler)
-  http.HandleFunc("/find", handlers.FindHandler)
+  http.Handle("/public/", http.StripPrefix("/public/", auth.BasicAuthHandler(http.FileServer(http.Dir("server/public/")))))
+
+  http.Handle("/", auth.BasicAuthHandler(http.HandlerFunc(handlers.IndexHandler)))
+  http.Handle("/add", auth.BasicAuthHandler(http.HandlerFunc(handlers.AddHandler)))
+  http.Handle("/find", auth.BasicAuthHandler(http.HandlerFunc(handlers.FindHandler)))
 
   http.Handle("/word/add",
     middlewares.Mongo(
-      http.HandlerFunc(handlers.AddWord), 
+      auth.BasicAuthHandler(http.HandlerFunc(handlers.AddWord)), 
       cfg.Database.Url,
       cfg.Database.Port,
       cfg.Database.DbName,
@@ -30,7 +31,7 @@ func Server() {
 
   http.Handle("/word/delete",
     middlewares.Mongo(
-      http.HandlerFunc(handlers.DelWord), 
+      auth.BasicAuthHandler(http.HandlerFunc(handlers.DelWord)), 
       cfg.Database.Url,
       cfg.Database.Port,
       cfg.Database.DbName,
@@ -38,7 +39,7 @@ func Server() {
 
   http.Handle("/word/update",
     middlewares.Mongo(
-      http.HandlerFunc(handlers.UpdateWord), 
+      auth.BasicAuthHandler(http.HandlerFunc(handlers.UpdateWord)), 
       cfg.Database.Url,
       cfg.Database.Port,
       cfg.Database.DbName,
@@ -46,7 +47,7 @@ func Server() {
 
   http.Handle("/words/filter",
     middlewares.Mongo(
-      http.HandlerFunc(handlers.FilterWords), 
+      auth.BasicAuthHandler(http.HandlerFunc(handlers.FilterWords)), 
       cfg.Database.Url,
       cfg.Database.Port,
       cfg.Database.DbName,
@@ -54,7 +55,7 @@ func Server() {
 
   http.Handle("/words",
     middlewares.Mongo(
-      http.HandlerFunc(handlers.FindWords), 
+      auth.BasicAuthHandler(http.HandlerFunc(handlers.FindWords)), 
       cfg.Database.Url,
       cfg.Database.Port,
       cfg.Database.DbName,
@@ -71,15 +72,6 @@ func Server() {
 
 
   log.Println("Http Server Listening on "+cfg.Http.Host+":"+cfg.Http.Port)
-  log.Fatal(
-    http.ListenAndServe(
-      cfg.Http.Host+":"+cfg.Http.Port, 
-      httpauth.Basic("private area", http.DefaultServeMux,
-      func(user, pass string) bool {
-          if user == cfg.Auth.Username && pass == cfg.Auth.Password {
-              return true
-          }
-          return false
-      })))
+  log.Fatal(http.ListenAndServe(cfg.Http.Host+":"+cfg.Http.Port, nil))
   
 }
