@@ -23,7 +23,7 @@ func Server() {
   
   auth := middlewares.NewBasicAuth(cfg.Auth.Username, cfg.Auth.Password)
 
-  http.Handle("/public/", http.StripPrefix("/public/", auth.BasicAuthHandler(http.FileServer(http.Dir("server/public/")))))
+  http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("server/public/"))))
 
   http.Handle("/", auth.BasicAuthHandler(http.HandlerFunc(handlers.IndexHandler)))
   http.Handle("/add", auth.BasicAuthHandler(http.HandlerFunc(handlers.AddHandler)))
