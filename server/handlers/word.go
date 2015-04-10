@@ -11,7 +11,9 @@ import (
   "gopkg.in/mgo.v2"
   "math/rand"
   "time"
+  "html/template"
   "errors"
+  "strings"
 )
 
 type Word struct {
@@ -200,7 +202,16 @@ func FindWords(w http.ResponseWriter, r *http.Request){
 
 }
 
+func contains (s []string)bool {
+  for _, v := range s { if v == "text/json" || v == "application/json" { return true }}
+  return false 
+}
+  
+
 func RandomWord(w http.ResponseWriter, r *http.Request){
+  Accept := strings.Split(r.Header.Get("Accept"), ",")
+  returnJson := contains(Accept)
+
   c := middlewares.GetWords(r)
 
   words := []Word{} 
@@ -220,9 +231,21 @@ func RandomWord(w http.ResponseWriter, r *http.Request){
     rand.Seed(time.Now().UnixNano())
     index := rand.Intn(len(words))
 
-    jsonMsg, _ := forgeResponse(Response{true, words[index:index+1]})
+    if returnJson == true {
+      jsonMsg, _ := forgeResponse(Response{true, words[index:index+1]})
+      fmt.Fprintf(w, jsonMsg)
+    } else {
+      tmpl, err := template.ParseFiles("server/views/word.html")
+      if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+      }
+      err = tmpl.Execute(w, words[index:index+1])
+      if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+      }
+    }
 
-    fmt.Fprintf(w, jsonMsg)
     return 
   }
 

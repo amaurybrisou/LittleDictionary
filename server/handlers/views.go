@@ -42,3 +42,15 @@ func FindHandler(w http.ResponseWriter, r *http.Request){
     http.Error(w, err.Error(), http.StatusInternalServerError)
   }
 }
+
+func RandomHandler(w http.ResponseWriter, r *http.Request){
+  tmpl, err := template.ParseFiles("server/views/word.html")
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+    return
+  }
+  err = tmpl.Execute(w, nil)
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+  }
+}

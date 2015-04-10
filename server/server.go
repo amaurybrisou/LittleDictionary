@@ -13,6 +13,14 @@ import (
 func Server() {
   cfg := config.Get("config.gcfg")
 
+  http.Handle("/words/random",
+    middlewares.Mongo(
+      http.HandlerFunc(handlers.RandomWord), 
+      cfg.Database.Url,
+      cfg.Database.Port,
+      cfg.Database.DbName,
+      cfg.Database.CollectionName ))
+  
   auth := middlewares.NewBasicAuth(cfg.Auth.Username, cfg.Auth.Password)
 
   http.Handle("/public/", http.StripPrefix("/public/", auth.BasicAuthHandler(http.FileServer(http.Dir("server/public/")))))
@@ -61,13 +69,7 @@ func Server() {
       cfg.Database.DbName,
       cfg.Database.CollectionName ))
 
-  http.Handle("/words/random",
-    middlewares.Mongo(
-      http.HandlerFunc(handlers.RandomWord), 
-      cfg.Database.Url,
-      cfg.Database.Port,
-      cfg.Database.DbName,
-      cfg.Database.CollectionName ))
+  
 
 
 
