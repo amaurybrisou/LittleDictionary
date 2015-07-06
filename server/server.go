@@ -3,9 +3,9 @@ package server
 import (
   "log"
   "net/http"
-  "LittleDictionary/config"
-  "LittleDictionary/server/middlewares"
-  "LittleDictionary/server/handlers"
+  "github.com/golang-amaurybrisou/LittleDictionary/config"
+  "github.com/golang-amaurybrisou/LittleDictionary/server/middlewares"
+  "github.com/golang-amaurybrisou/LittleDictionary/server/handlers"
 )
 
 

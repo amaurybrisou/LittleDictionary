@@ -2,7 +2,7 @@ package main
 
 
 import (	
-  "LittleDictionary/server"
+  "github.com/golang-amaurybrisou/LittleDictionary/server"
 	// "log"
 )
 
