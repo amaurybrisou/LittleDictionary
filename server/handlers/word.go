@@ -6,7 +6,7 @@ import (
   "encoding/json"
   "io"
   "fmt"
-  "github.com/golang-amaurybrisou/LittleDictionary/server/middlewares"
+  "github.com/goland-amaurybrisou/LittleDictionary/server/middlewares"
   "gopkg.in/mgo.v2/bson"
   "gopkg.in/mgo.v2"
   "math/rand"
