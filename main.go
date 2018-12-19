@@ -2,7 +2,7 @@ package main
 
 
 import (	
-  "github.com/goland-amaurybrisou/LittleDictionary/server"
+  "server"
 	// "log"
 )
 

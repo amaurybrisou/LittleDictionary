@@ -1,0 +1,38 @@
+{
+  "title": "Find word",
+  "type": "object",
+  "properties": {
+    "Word": {
+      "title": "Word",
+      "type": "string",
+      "required": false,
+      "focus": true
+    },
+    "Pos": {
+      "title": "Part of speech",
+      "type": "text",
+      "required": false,
+      "enum": ["Noun", "Pronoun", "Verb", "Adjective", "Adverb", "Preposition", "Conjunction", "Interjection", "Expression"]
+    },
+    "Definition": {
+      "title": "Definition",
+      "type": "string",
+      "required": false
+    },
+    "Language": {
+      "title": "Language",
+      "type": "string",
+      "required": false
+    },
+    "Example": {
+      "title": "Example",
+      "type": "string",
+      "required": false
+    },
+    "Ethymology": {
+      "title": "Ethymology",
+      "type": "string",
+      "required": false
+    }
+  }
+}

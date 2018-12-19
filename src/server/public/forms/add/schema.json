@@ -1,0 +1,39 @@
+{
+  "title": "Add new word",
+  "type": "object",
+  "properties": {
+    "Word": {
+      "title": "Word",
+      "type": "string",
+      "required": true,
+      "focus": true
+    },
+    "Pos": {
+      "title": "Part of speech",
+      "type": "string",
+      "required": true,
+      "default": "Noun",
+      "enum": ["Noun", "Pronoun", "Verb", "Adjective", "Adverb", "Preposition", "Conjunction", "Interjection", "Expression"]
+    },
+    "Definition": {
+      "title": "Definition",
+      "type": "string",
+      "required": true
+    },
+    "Language": {
+      "title": "Language",
+      "type": "string",
+      "required": true
+    },
+    "Example": {
+      "title": "Example",
+      "type": "string",
+      "required": false
+    },
+    "Ethymology": {
+      "title": "Ethymology",
+      "type": "string",
+      "required": false
+    }
+  }
+}

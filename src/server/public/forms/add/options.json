@@ -1,0 +1,25 @@
+{
+  "renderForm": true,
+  "focus": true,
+  "form": {
+
+    "buttons": {
+      "submit": {
+        "id": "save-button"
+      },
+      "reset": {}
+    }
+  },
+  "fields": {
+    "Word": {
+
+      "hideInitValidationError": true
+    },
+    "Pos": {
+      "hideInitValidationError": true,
+      "type": "select",
+      "class": "dropdown-menu",
+      "optionLabels": ["Noun", "Pronoun", "Verb", "Adjective", "Adverb", "Preposition", "Conjunction", "Interjection", "Expression"]
+    }
+  }
+}
