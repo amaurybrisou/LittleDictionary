@@ -1,6 +1,0 @@
-{
-    "go.inferGopath": false,
-    "go.gotoSymbol.includeGoroot": true,
-    "go.autocompleteUnimportedPackages": true,
-    "go.gopath": "/home/erol/.go-packages:/home/erol/Documents/go/polished/LittleDictionary"
-}
